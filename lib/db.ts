@@ -2,6 +2,11 @@ import mongoose from 'mongoose';
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
+type DatabaseConnectionState = {
+  connected: boolean;
+  connection: typeof mongoose | null;
+};
+
 declare global {
   var mongooseCache:
     | {
@@ -12,31 +17,32 @@ declare global {
 }
 
 const cache = global.mongooseCache ?? { conn: null, promise: null };
-
 global.mongooseCache = cache;
 
-export async function connectToDatabase() {
+export async function connectToDatabase(): Promise<DatabaseConnectionState> {
   if (!MONGODB_URI) {
-    return { connected: false as const, connection: null };
+    console.warn('MONGODB_URI is not defined. Using in-memory billing data.');
+    return { connected: false, connection: null };
   }
 
   if (cache.conn) {
-    return { connected: true as const, connection: cache.conn };
+    return { connected: true, connection: cache.conn };
   }
 
   if (!cache.promise) {
     cache.promise = mongoose.connect(MONGODB_URI, {
       bufferCommands: false,
-      serverSelectionTimeoutMS: 3000,
     });
   }
 
   try {
     cache.conn = await cache.promise;
-    return { connected: true as const, connection: cache.conn };
+    console.log('MongoDB connected successfully');
+    return { connected: true, connection: cache.conn };
   } catch (error) {
-    console.warn('MongoDB connection failed, using in-memory fallback.', error);
     cache.promise = null;
-    return { connected: false as const, connection: null };
+    cache.conn = null;
+    console.error('MongoDB connection failed. Using in-memory billing data.', error);
+    return { connected: false, connection: null };
   }
 }

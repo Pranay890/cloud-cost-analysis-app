@@ -38,14 +38,15 @@ export function CsvUpload({ onUploaded }: { onUploaded: () => Promise<void> }) {
           });
 
           const data = await response.json();
-          setMessage(data.message ?? 'Billing data uploaded successfully.');
 
-          // ❌ OLD (remove this)
-          // await onUploaded();
+          if (!response.ok) {
+            setMessage(data.message ?? 'Upload failed. Please try again.');
+            return;
+          }
 
-          // ✅ NEW (FIX ALL PAGES SYNC)
-          window.location.reload();
-
+          const target = data.source === 'mongo' ? 'MongoDB' : 'in-memory fallback';
+          setMessage(data.message ?? `Billing data uploaded successfully to ${target}.`);
+          await onUploaded();
         } catch (error) {
           console.error(error);
           setMessage('Upload failed. Please try again.');

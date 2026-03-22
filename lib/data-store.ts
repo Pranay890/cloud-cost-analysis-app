@@ -31,23 +31,31 @@ export async function getBillingRecords(filters?: FilterState) {
   const db = await connectToDatabase();
 
   let records: BillingRecord[];
+  let source: 'mongo' | 'memory';
 
   if (db.connected) {
     const docs = await BillingRecordModel
       .find({}, { _id: 0, __v: 0 })
       .lean<BillingRecord[]>();
 
-    records = docs;
+    if (docs.length > 0) {
+      records = docs;
+      source = 'mongo';
+    } else {
+      records = memoryRecords;
+      source = 'memory';
+    }
   } else {
     // ✅ fallback (IMPORTANT)
     records = memoryRecords;
+    source = 'memory';
   }
 
   const filtered = filterRecords(records, filters);
 
   return {
     records: filtered,
-    source: db.connected ? 'mongo' : 'memory',
+    source,
   };
 }
 

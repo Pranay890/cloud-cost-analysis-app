@@ -15,17 +15,32 @@ export function DashboardClient() {
   const [analytics, setAnalytics] = useState<AnalyticsPayload | null>(null);
   const [loading, setLoading] = useState(true);
   const [resetting, setResetting] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   // ✅ FIXED: ARRAY TYPE
   const [aiInsights, setAiInsights] = useState<AiInsight[]>([]);
   const [loadingAI, setLoadingAI] = useState(false);
 
   const loadAnalytics = useCallback(async () => {
-    setLoading(true);
-    const response = await fetch('/api/analytics?t=' + Date.now(), { cache: 'no-store' });
-    const data = await response.json();
-    setAnalytics(data.analytics);
-    setLoading(false);
+    try {
+      setLoading(true);
+      setLoadError(null);
+
+      const response = await fetch('/api/analytics?t=' + Date.now(), { cache: 'no-store' });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to load analytics');
+      }
+
+      setAnalytics(data.analytics ?? null);
+    } catch (error) {
+      console.error(error);
+      setAnalytics(null);
+      setLoadError('Unable to load analytics right now. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -91,12 +106,38 @@ export function DashboardClient() {
   if (loading || !analytics) {
     return (
       <div className="space-y-6">
-        <Skeleton className="h-32 w-full" />
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-32 w-full" />
-          ))}
-        </div>
+        {loading ? (
+          <>
+            <Skeleton className="h-32 w-full" />
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Skeleton key={i} className="h-32 w-full" />
+              ))}
+            </div>
+          </>
+        ) : (
+          <Card className="p-6">
+            <h2 className="text-xl font-semibold text-white">Dashboard unavailable</h2>
+            <p className="mt-2 text-sm text-muted">
+              {loadError ?? 'No billing data is available yet. Upload a CSV or reset the sample data.'}
+            </p>
+            <div className="mt-4 flex gap-3">
+              <Button variant="outline" onClick={() => void loadAnalytics()}>
+                Retry
+              </Button>
+              <Button
+                onClick={async () => {
+                  setResetting(true);
+                  await fetch('/api/reset', { method: 'POST' });
+                  await loadAnalytics();
+                  setResetting(false);
+                }}
+              >
+                {resetting ? 'Resetting...' : 'Reset Data'}
+              </Button>
+            </div>
+          </Card>
+        )}
       </div>
     );
   }
