@@ -1,4 +1,3 @@
-# Local build artifacts
 .next
 node_modules
 .env
