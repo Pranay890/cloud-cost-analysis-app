@@ -8,7 +8,7 @@ import { StatCard } from '@/components/stat-card';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/skeleton';
-import { AnalyticsPayload } from '@/lib/types';
+import { AnalyticsPayload, AiInsight } from '@/lib/types';
 import { currency } from '@/lib/utils';
 
 export function DashboardClient() {
@@ -16,9 +16,13 @@ export function DashboardClient() {
   const [loading, setLoading] = useState(true);
   const [resetting, setResetting] = useState(false);
 
+  // ✅ FIXED: ARRAY TYPE
+  const [aiInsights, setAiInsights] = useState<AiInsight[]>([]);
+  const [loadingAI, setLoadingAI] = useState(false);
+
   const loadAnalytics = useCallback(async () => {
     setLoading(true);
-    const response = await fetch('/api/analytics', { cache: 'no-store' });
+    const response = await fetch('/api/analytics?t=' + Date.now(), { cache: 'no-store' });
     const data = await response.json();
     setAnalytics(data.analytics);
     setLoading(false);
@@ -28,28 +32,57 @@ export function DashboardClient() {
     void loadAnalytics();
   }, [loadAnalytics]);
 
+  // ✅ FIXED AI FUNCTION
+  const generateInsights = async () => {
+    if (!analytics) return;
+
+    try {
+      setLoadingAI(true);
+
+      const res = await fetch('/api/ai-insights', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          total_cost: analytics.totalCost,
+          services: analytics.serviceBreakdown.map((s) => ({
+            name: s.service,
+            cost: s.cost,
+          })),
+        }),
+      });
+
+      const data = await res.json();
+      setAiInsights(data.insights || []);
+    } catch (err) {
+      console.error(err);
+      setAiInsights([]);
+    } finally {
+      setLoadingAI(false);
+    }
+  };
+
   const stats = useMemo(() => {
     if (!analytics) return [];
     return [
       {
         title: 'Total Cost',
         value: currency.format(analytics.totalCost),
-        helper: 'Across all imported cloud billing records',
+        helper: 'Across all imported records',
       },
       {
         title: 'Avg Daily Cost',
         value: currency.format(analytics.avgDailyCost),
-        helper: 'Average spend per active billing day',
+        helper: 'Per active billing day',
       },
       {
-        title: 'Forecast Cost',
+        title: 'Forecast',
         value: currency.format(analytics.forecastCost),
-        helper: '3-day moving average forecast',
+        helper: '3-day moving avg',
       },
       {
-        title: 'Cost Change %',
+        title: 'Change',
         value: `${analytics.costChangePct.toFixed(1)}%`,
-        helper: 'Current period vs previous period',
+        helper: 'Vs previous period',
         change: analytics.costChangePct,
       },
     ];
@@ -58,15 +91,11 @@ export function DashboardClient() {
   if (loading || !analytics) {
     return (
       <div className="space-y-6">
-        <Skeleton className="h-40 w-full" />
+        <Skeleton className="h-32 w-full" />
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, index) => (
-            <Skeleton key={index} className="h-36 w-full" />
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-32 w-full" />
           ))}
-        </div>
-        <div className="grid gap-4 xl:grid-cols-2">
-          <Skeleton className="h-[360px] w-full" />
-          <Skeleton className="h-[360px] w-full" />
         </div>
       </div>
     );
@@ -74,67 +103,116 @@ export function DashboardClient() {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-3xl border border-border bg-grid bg-[size:28px_28px] bg-card/80 p-6">
-        <div className="flex flex-col gap-6 xl:flex-row xl:items-center xl:justify-between">
-          <div className="max-w-2xl">
-            <p className="text-sm uppercase tracking-[0.25em] text-blue-300">Cloud Cost Analysis & Optimization Platform</p>
-            <h2 className="mt-3 text-4xl font-semibold text-white">Monitor spend, surface anomalies, and turn optimization into action.</h2>
-            <p className="mt-4 text-base text-muted">
-              Upload AWS, Azure, or GCP billing exports to instantly explore dashboards, rule-based savings recommendations, and AI-generated FinOps insights.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-3">
-            <Button variant="outline" onClick={async () => {
+
+      {/* HEADER */}
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-semibold text-white">Dashboard</h2>
+
+        <div className="flex gap-3">
+          <Button
+            variant="outline"
+            onClick={async () => {
               setResetting(true);
               await fetch('/api/reset', { method: 'POST' });
               await loadAnalytics();
               setResetting(false);
-            }}>
-              <RefreshCw className="mr-2 h-4 w-4" />
-              {resetting ? 'Resetting...' : 'Reset Data'}
-            </Button>
-            <Button onClick={() => window.location.assign('/genai-optimization')}>
-              <Sparkles className="mr-2 h-4 w-4" /> Generate AI Insights
-            </Button>
-          </div>
-        </div>
-      </section>
+            }}
+          >
+            <RefreshCw className="mr-2 h-4 w-4" />
+            {resetting ? 'Resetting...' : 'Reset Data'}
+          </Button>
 
+          <Button onClick={generateInsights}>
+            <Sparkles className="mr-2 h-4 w-4" />
+            {loadingAI ? 'Analyzing...' : 'Generate Insights'}
+          </Button>
+        </div>
+      </div>
+
+      {/* 🔥 FIXED AI UI */}
+      {aiInsights.length > 0 && (
+        <div className="grid gap-4 md:grid-cols-3">
+          {aiInsights.map((insight, index) => (
+            <Card
+              key={index}
+              className="p-5 hover:shadow-[0_0_20px_rgba(59,130,246,0.15)] transition-all"
+            >
+              <span
+                className={`text-xs px-2 py-1 rounded-full ${
+                  insight.priority === 'High'
+                    ? 'bg-red-500/20 text-red-300'
+                    : insight.priority === 'Medium'
+                    ? 'bg-yellow-500/20 text-yellow-300'
+                    : 'bg-green-500/20 text-green-300'
+                }`}
+              >
+                {insight.priority}
+              </span>
+
+              <h3 className="mt-3 text-lg font-semibold text-white">
+                {insight.title}
+              </h3>
+
+              <p className="mt-2 text-sm text-muted">
+                {insight.reasoning}
+              </p>
+
+              <p className="mt-2 text-sm text-blue-300">
+                💰 {insight.estimatedSavings}
+              </p>
+
+              <p className="mt-2 text-xs text-red-300">
+                ⚠ {insight.anomaly}
+              </p>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {/* CSV Upload */}
       <CsvUpload onUploaded={loadAnalytics} />
 
+      {/* Stats */}
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {stats.map((stat) => (
           <StatCard key={stat.title} {...stat} />
         ))}
       </section>
 
+      {/* Charts */}
       <section className="grid gap-4 xl:grid-cols-2">
         <TrendLineChart data={analytics.dailyTrend} />
         <ServiceBarChart data={analytics.serviceBreakdown} />
       </section>
 
+      {/* Bottom */}
       <section className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
         <DistributionPieChart data={analytics.costDistribution} />
+
         <Card className="p-5">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <h3 className="text-lg font-semibold text-white">Top expensive services</h3>
-              <p className="text-sm text-muted">Prioritize these areas for optimization review.</p>
-            </div>
-          </div>
+          <h3 className="text-lg font-semibold text-white">
+            Top expensive services
+          </h3>
+
           <div className="mt-5 space-y-4">
             {analytics.topServices.map((service, index) => (
-              <div key={service.service} className="flex items-center justify-between rounded-2xl border border-border px-4 py-3">
+              <div
+                key={service.service}
+                className="flex items-center justify-between rounded-2xl border border-border px-4 py-3"
+              >
                 <div>
-                  <p className="text-xs uppercase tracking-[0.2em] text-blue-300">#{index + 1}</p>
-                  <p className="mt-1 font-medium text-white">{service.service}</p>
+                  <p className="text-xs text-blue-400">#{index + 1}</p>
+                  <p className="text-white">{service.service}</p>
                 </div>
-                <p className="font-semibold text-white">{currency.format(service.cost)}</p>
+                <p className="font-semibold text-white">
+                  {currency.format(service.cost)}
+                </p>
               </div>
             ))}
           </div>
         </Card>
       </section>
+
     </div>
   );
 }

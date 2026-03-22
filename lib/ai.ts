@@ -1,50 +1,68 @@
 import { AiInsight } from '@/lib/types';
 
-function fallbackInsights(payload: { total_cost: number; services: { name: string; cost: number }[] }): AiInsight[] {
-  const topService = payload.services[0];
-  const secondService = payload.services[1];
+// ==============================
+// ✅ FALLBACK (SAFE)
+// ==============================
+function fallbackInsights(payload: {
+  total_cost: number;
+  services: { name: string; cost: number }[];
+}): AiInsight[] {
+  const sorted = [...payload.services].sort((a, b) => b.cost - a.cost);
+
+  const topService = sorted[0];
+  const secondService = sorted[1];
 
   return [
     {
-      title: `Focus on ${topService?.name ?? 'compute'} commitments`,
+      title: `Optimize ${topService?.name ?? 'compute'} usage`,
       reasoning:
-        'Your highest-cost service dominates the monthly spend profile. Converting stable workloads to commitments or rightsized instances can immediately improve unit economics.',
-      estimatedSavings: '12% to 28% of the primary service spend',
+        'This service contributes the largest share of your cloud spend. Consider rightsizing, reserved instances, or autoscaling strategies.',
+      estimatedSavings: '10%–30%',
       anomaly: secondService
-        ? `${secondService.name} is your second largest cost center and should be reviewed for bursty utilization.`
-        : 'Review sudden cost spikes against release dates and scheduled jobs.',
+        ? `${secondService.name} is the second highest cost driver — check for inefficient scaling.`
+        : 'Monitor cost spikes and irregular usage patterns.',
       priority: 'High',
     },
     {
-      title: 'Review non-production scheduling windows',
+      title: 'Schedule non-production resources',
       reasoning:
-        'Development and QA resources often run overnight and on weekends. Scheduling shutdowns is a low-risk optimization with fast payback.',
-      estimatedSavings: '8% to 15% of total monthly spend',
-      anomaly: 'Look for flat daily spend patterns, which can indicate always-on environments.',
+        'Development and testing environments often run continuously. Scheduling shutdown during idle hours reduces unnecessary cost.',
+      estimatedSavings: '5%–15%',
+      anomaly:
+        'Flat usage patterns may indicate resources running continuously without need.',
       priority: 'Medium',
     },
     {
-      title: 'Improve data retention and lifecycle management',
+      title: 'Improve storage lifecycle policies',
       reasoning:
-        'Storage and analytics services accumulate stale backups, logs, and snapshots over time. Enforcing tiering and retention policies reduces silent cost drift.',
-      estimatedSavings: '5% to 12% of total storage-related spend',
-      anomaly: 'Storage-heavy workloads should be checked for backup duplication and long retention defaults.',
+        'Unused logs, backups, and snapshots accumulate over time. Implement lifecycle rules to archive or delete stale data.',
+      estimatedSavings: '5%–12%',
+      anomaly:
+        'High storage usage may indicate redundant backups or long retention settings.',
       priority: 'Medium',
     },
   ];
 }
 
+// ==============================
+// ✅ SAFE JSON EXTRACTION
+// ==============================
 function extractJson(text: string): AiInsight[] | null {
-  const match = text.match(/\[[\s\S]*\]/);
-  if (!match) return null;
-
   try {
-    return JSON.parse(match[0]) as AiInsight[];
+    const start = text.indexOf('[');
+    const end = text.lastIndexOf(']');
+    if (start === -1 || end === -1) return null;
+
+    const jsonString = text.slice(start, end + 1);
+    return JSON.parse(jsonString) as AiInsight[];
   } catch {
     return null;
   }
 }
 
+// ==============================
+// ✅ OPENAI CALL
+// ==============================
 async function callOpenAi(prompt: string) {
   const response = await fetch('https://api.openai.com/v1/responses', {
     method: 'POST',
@@ -58,13 +76,20 @@ async function callOpenAi(prompt: string) {
     }),
   });
 
-  if (!response.ok) throw new Error(`OpenAI request failed: ${response.status}`);
-  const data = (await response.json()) as { output_text?: string };
+  if (!response.ok) {
+    throw new Error(`OpenAI request failed: ${response.status}`);
+  }
+
+  const data = await response.json();
   return data.output_text ?? '';
 }
 
+// ==============================
+// ✅ GEMINI CALL
+// ==============================
 async function callGemini(prompt: string) {
   const model = process.env.GEMINI_MODEL || 'gemini-1.5-flash';
+
   const response = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`,
     {
@@ -76,40 +101,78 @@ async function callGemini(prompt: string) {
     }
   );
 
-  if (!response.ok) throw new Error(`Gemini request failed: ${response.status}`);
-  const data = (await response.json()) as {
-    candidates?: { content?: { parts?: { text?: string }[] } }[];
-  };
-  return data.candidates?.[0]?.content?.parts?.map((part) => part.text ?? '').join('') ?? '';
+  if (!response.ok) {
+    throw new Error(`Gemini request failed: ${response.status}`);
+  }
+
+  const data = await response.json();
+
+  return (
+    data?.candidates?.[0]?.content?.parts
+      ?.map((p: { text?: string }) => p.text ?? '')
+      .join('') ?? ''
+  );
 }
 
+// ==============================
+// ✅ MAIN FUNCTION
+// ==============================
 export async function generateAiInsights(payload: {
   total_cost: number;
   services: { name: string; cost: number }[];
 }) {
-  const prompt = `You are a FinOps expert. Given cloud billing summary data, return a JSON array of 3 objects. Each object must have keys: title, reasoning, estimatedSavings, anomaly, priority. Priorities must be High, Medium, or Low. Focus on cost optimization, anomaly detection, and concrete actions. Data: ${JSON.stringify(
-    payload
-  )}`;
+  const sortedServices = [...payload.services]
+    .sort((a, b) => b.cost - a.cost)
+    .slice(0, 5);
 
+  const cleanPayload = {
+    total_cost: payload.total_cost,
+    services: sortedServices,
+  };
+
+  const prompt = `
+You are a FinOps expert.
+
+Analyze this cloud cost data and return ONLY a JSON array (no explanation).
+
+Each object must contain:
+- title
+- reasoning
+- estimatedSavings
+- anomaly
+- priority (High | Medium | Low)
+
+Focus on:
+- cost optimization
+- anomaly detection
+- actionable recommendations
+
+DATA:
+${JSON.stringify(cleanPayload, null, 2)}
+`;
+
+  // 🔹 Try OpenAI first
   if (process.env.OPENAI_API_KEY) {
     try {
       const text = await callOpenAi(prompt);
       const parsed = extractJson(text);
       if (parsed?.length) return parsed;
-    } catch (error) {
-      console.warn('OpenAI insight generation failed. Falling back.', error);
+    } catch (err) {
+      console.warn('OpenAI failed → fallback to Gemini', err);
     }
   }
 
+  // 🔹 Then Gemini
   if (process.env.GEMINI_API_KEY) {
     try {
       const text = await callGemini(prompt);
       const parsed = extractJson(text);
       if (parsed?.length) return parsed;
-    } catch (error) {
-      console.warn('Gemini insight generation failed. Falling back.', error);
+    } catch (err) {
+      console.warn('Gemini failed → fallback to rules', err);
     }
   }
 
-  return fallbackInsights(payload);
+  // 🔹 Final fallback
+  return fallbackInsights(cleanPayload);
 }

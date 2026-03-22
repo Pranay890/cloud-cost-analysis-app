@@ -30,15 +30,27 @@ export function CsvUpload({ onUploaded }: { onUploaded: () => Promise<void> }) {
           return;
         }
 
-        const response = await fetch('/api/billing', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ records }),
-        });
+        try {
+          const response = await fetch('/api/billing', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ records }),
+          });
 
-        const data = await response.json();
-        setMessage(data.message ?? 'Billing data uploaded successfully.');
-        await onUploaded();
+          const data = await response.json();
+          setMessage(data.message ?? 'Billing data uploaded successfully.');
+
+          // ❌ OLD (remove this)
+          // await onUploaded();
+
+          // ✅ NEW (FIX ALL PAGES SYNC)
+          window.location.reload();
+
+        } catch (error) {
+          console.error(error);
+          setMessage('Upload failed. Please try again.');
+        }
+
         setLoading(false);
       },
       error: (error) => {
