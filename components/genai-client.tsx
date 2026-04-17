@@ -41,8 +41,8 @@ export function GenAiClient() {
       <div className="space-y-6">
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="text-sm uppercase tracking-[0.25em] text-blue-300">GenAI Optimization</p>
-            <h2 className="mt-2 text-3xl font-semibold text-white">Generate FinOps guidance with OpenAI or Gemini-backed insights.</h2>
+            <p className="text-sm uppercase tracking-[0.25em] text-primary font-semibold">GenAI Optimization</p>
+            <h2 className="mt-2 text-3xl font-bold text-foreground">Generate FinOps guidance with OpenAI or Gemini-backed insights.</h2>
           </div>
           <Button onClick={generateInsights} disabled={loading || !analytics}>
             <BrainCircuit className="mr-2 h-4 w-4" />

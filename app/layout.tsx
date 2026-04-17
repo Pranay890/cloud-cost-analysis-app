@@ -1,5 +1,7 @@
 import './globals.css';
 import type { Metadata } from 'next';
+import { AuthProvider } from '@/lib/auth-context';
+import { AnalyticsProvider } from '@/lib/analytics-context';
 
 export const metadata: Metadata = {
   title: 'Cloud Cost Analysis & Optimization Platform',
@@ -8,8 +10,12 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className="dark">
-      <body>{children}</body>
+    <html lang="en">
+      <body>
+        <AuthProvider>
+          <AnalyticsProvider>{children}</AnalyticsProvider>
+        </AuthProvider>
+      </body>
     </html>
   );
 }

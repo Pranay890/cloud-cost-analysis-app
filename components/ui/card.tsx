@@ -5,10 +5,11 @@ export function Card({ className, ...props }: React.HTMLAttributes<HTMLDivElemen
   return (
     <div
       className={cn(
-        'rounded-2xl border border-border bg-card/80 backdrop-blur-xl shadow-glow',
+        'rounded-lg border border-border bg-white shadow-card backdrop-blur-sm transition-all duration-300 hover:shadow-card-hover hover:-translate-y-0.5',
         className
       )}
       {...props}
     />
   );
 }
+

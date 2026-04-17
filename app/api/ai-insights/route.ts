@@ -60,11 +60,10 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json({ insights });
-
   } catch (error) {
-    console.error(error);
+    console.error('AI Insights generation failed:', error);
     return NextResponse.json(
-      { message: 'Failed to generate AI insights.' },
+      { message: 'Failed to generate AI insights. Please try again later.' },
       { status: 500 }
     );
   }

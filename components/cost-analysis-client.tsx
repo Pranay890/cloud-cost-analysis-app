@@ -42,10 +42,10 @@ export function CostAnalysisClient() {
     <LayoutShell>
       <div className="space-y-6">
         <div>
-          <p className="text-sm uppercase tracking-[0.25em] text-blue-300">
+          <p className="text-sm uppercase tracking-[0.25em] text-primary font-semibold">
             Cost Analysis
           </p>
-          <h2 className="mt-2 text-3xl font-semibold text-white">
+          <h2 className="mt-2 text-3xl font-bold text-foreground">
             Deep dive into service and time-based cloud spend.
           </h2>
         </div>
@@ -70,7 +70,7 @@ export function CostAnalysisClient() {
               
               {/* Top Services */}
               <Card className="p-5 h-[420px] flex flex-col">
-                <h3 className="text-lg font-semibold text-white">
+                <h3 className="text-lg font-semibold text-foreground">
                   Top 5 expensive services
                 </h3>
 
@@ -78,15 +78,15 @@ export function CostAnalysisClient() {
                   {analytics.topServices.map((item, index) => (
                     <div
                       key={item.service}
-                      className="flex items-center justify-between rounded-2xl border border-border px-4 py-3"
+                      className="flex items-center justify-between rounded-lg border border-border px-4 py-3"
                     >
                       <div>
                         <p className="text-xs uppercase tracking-[0.2em] text-blue-300">
                           #{index + 1}
                         </p>
-                        <p className="mt-1 text-white">{item.service}</p>
+                        <p className="mt-1 text-foreground">{item.service}</p>
                       </div>
-                      <p className="font-semibold text-white">
+                      <p className="font-bold text-foreground">
                         {currency.format(item.cost)}
                       </p>
                     </div>
@@ -96,7 +96,7 @@ export function CostAnalysisClient() {
 
               {/* ✅ FIXED: Cost by date (SCROLL ONLY HERE) */}
               <Card className="p-5 h-[420px] flex flex-col">
-                <h3 className="text-lg font-semibold text-white">
+                <h3 className="text-lg font-semibold text-foreground">
                   Cost by date
                 </h3>
 
@@ -107,7 +107,7 @@ export function CostAnalysisClient() {
                       className="flex items-center justify-between rounded-2xl border border-border px-4 py-3 text-sm"
                     >
                       <span className="text-muted">{item.date}</span>
-                      <span className="font-semibold text-white">
+                      <span className="font-bold text-foreground">
                         {currency.format(item.cost)}
                       </span>
                     </div>

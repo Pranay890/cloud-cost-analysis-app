@@ -64,7 +64,7 @@ function extractJson(text: string): AiInsight[] | null {
 // ✅ OPENAI CALL
 // ==============================
 async function callOpenAi(prompt: string) {
-  const response = await fetch('https://api.openai.com/v1/responses', {
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -72,7 +72,8 @@ async function callOpenAi(prompt: string) {
     },
     body: JSON.stringify({
       model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
-      input: prompt,
+      messages: [{ role: 'user', content: prompt }],
+      temperature: 0.7,
     }),
   });
 
@@ -81,7 +82,7 @@ async function callOpenAi(prompt: string) {
   }
 
   const data = await response.json();
-  return data.output_text ?? '';
+  return data.choices?.[0]?.message?.content ?? '';
 }
 
 // ==============================
@@ -97,6 +98,9 @@ async function callGemini(prompt: string) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: {
+          temperature: 0.7,
+        },
       }),
     }
   );

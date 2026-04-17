@@ -23,12 +23,12 @@ export const sampleBillingData: BillingRecord[] = [
   { date: '2026-03-07', service_name: 'Azure Virtual Machines', cost: 132, region: 'eastus' },
   { date: '2026-03-07', service_name: 'Azure Blob Storage', cost: 110, region: 'eastus' },
   { date: '2026-03-08', service_name: 'EC2', cost: 468, region: 'us-east-1' },
-  { date: '2026-03-08', service_name: 'RDS', cost: 226, region: 'us-east-1' },
+  { date: '2026-03-08', service_name: 'RDS', cost: 286, region: 'us-east-1' },
   { date: '2026-03-08', service_name: 'Cloud Storage', cost: 120, region: 'us-central1' },
-  { date: '2026-03-09', service_name: 'EC2', cost: 472, region: 'us-east-1' },
-  { date: '2026-03-09', service_name: 'S3', cost: 177, region: 'us-east-1' },
-  { date: '2026-03-09', service_name: 'BigQuery', cost: 111, region: 'us-central1' },
-  { date: '2026-03-10', service_name: 'EC2', cost: 478, region: 'us-east-1' },
+  { date: '2026-03-09', service_name: 'EC2', cost: 648, region: 'us-east-1' },
+  { date: '2026-03-09', service_name: 'S3', cost: 312, region: 'us-east-1' },
+  { date: '2026-03-09', service_name: 'BigQuery', cost: 196, region: 'us-central1' },
+  { date: '2026-03-10', service_name: 'EC2', cost: 512, region: 'us-east-1' },
   { date: '2026-03-10', service_name: 'RDS', cost: 231, region: 'us-east-1' },
-  { date: '2026-03-10', service_name: 'Azure Monitor', cost: 48, region: 'eastus' }
+  { date: '2026-03-10', service_name: 'Azure Monitor', cost: 142, region: 'eastus' }
 ];

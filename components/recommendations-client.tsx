@@ -19,8 +19,8 @@ export function RecommendationsClient() {
     <LayoutShell>
       <div className="space-y-6">
         <div>
-          <p className="text-sm uppercase tracking-[0.25em] text-blue-300">Recommendations</p>
-          <h2 className="mt-2 text-3xl font-semibold text-white">Rule-based optimization actions built for quick wins.</h2>
+          <p className="text-sm uppercase tracking-[0.25em] text-primary font-semibold">Recommendations</p>
+          <h2 className="mt-2 text-3xl font-bold text-foreground">Rule-based optimization actions built for quick wins.</h2>
         </div>
         <Card className="p-5 text-sm text-muted">
           Recommendation logic covers compute commitment opportunities, idle-resource cleanup, storage lifecycle tuning, and governance fallback guidance.

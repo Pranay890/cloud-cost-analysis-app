@@ -1,7 +1,6 @@
 import type { Config } from 'tailwindcss';
 
 const config: Config = {
-  darkMode: ['class'],
   content: [
     './app/**/*.{ts,tsx}',
     './components/**/*.{ts,tsx}',
@@ -10,21 +9,38 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: '#060816',
-        foreground: '#f8fafc',
-        card: '#0c1124',
-        border: '#1f2940',
-        muted: '#94a3b8',
-        primary: '#60a5fa',
-        accent: '#1d4ed8',
-        success: '#22c55e',
-        warning: '#f59e0b',
+        background: '#F8FAFC',
+        foreground: '#0F172A',
+        card: '#FFFFFF',
+        'card-alt': '#FFFFFF',
+        border: '#E2E8F0',
+        muted: '#475569',
+        primary: '#2563EB',
+        'primary-light': '#DBEAFE',
+        'primary-hover': '#1D4ED8',
+        accent: '#16A34A',
+        'accent-light': '#DCFCE7',
+        secondary: '#38BDF8',
+        'secondary-light': '#38BDF8',
+        success: '#16A34A',
+        'success-light': '#DCFCE7',
+        warning: '#F59E0B',
+        'warning-light': '#FEF3C7',
+        error: '#EF4444',
+        'error-light': '#FEE2E2',
       },
       boxShadow: {
-        glow: '0 0 0 1px rgba(96,165,250,0.15), 0 12px 60px rgba(15,23,42,0.45)',
+        'sm': '0 1px 2px rgba(0, 0, 0, 0.05)',
+        'card': '0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04)',
+        'card-hover': '0 10px 25px -3px rgba(0, 0, 0, 0.12), 0 4px 12px -2px rgba(0, 0, 0, 0.08)',
+        'md': '0 4px 12px rgba(0, 0, 0, 0.1)',
+        'lg': '0 10px 30px rgba(0, 0, 0, 0.12)',
+        'xl': '0 20px 40px rgba(0, 0, 0, 0.15)',
+        'premium': '0 12px 32px rgba(0, 0, 0, 0.14)',
+        'glow': '0 0 0 4px rgba(37, 99, 235, 0.12)',
       },
       backgroundImage: {
-        grid: 'linear-gradient(rgba(148, 163, 184, 0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(148, 163, 184, 0.08) 1px, transparent 1px)',
+        gradient: 'linear-gradient(135deg, #F8FAFC 0%, #FFFFFF 100%)',
       },
     },
   },

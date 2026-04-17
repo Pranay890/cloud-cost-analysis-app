@@ -35,11 +35,24 @@ export async function connectToDatabase(): Promise<DatabaseConnectionState> {
     });
   }
 
+  // Optimize database connection fallback
+  if (!cache.conn) {
+    console.warn('Using in-memory data. Ensure MongoDB is running for production.');
+  }
+
+  // Add a timeout for MongoDB connection attempts
+  const connectionTimeout = setTimeout(() => {
+    console.error('MongoDB connection timeout. Falling back to in-memory data.');
+    cache.promise = null;
+  }, 5000);
+
   try {
     cache.conn = await cache.promise;
+    clearTimeout(connectionTimeout);
     console.log('MongoDB connected successfully');
     return { connected: true, connection: cache.conn };
   } catch (error) {
+    clearTimeout(connectionTimeout);
     cache.promise = null;
     cache.conn = null;
     console.error('MongoDB connection failed. Using in-memory billing data.', error);

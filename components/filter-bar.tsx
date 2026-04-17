@@ -1,8 +1,8 @@
 'use client';
 
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
 import { FilterState } from '@/lib/types';
 
 export function FilterBar({
@@ -17,7 +17,7 @@ export function FilterBar({
   onReset: () => void;
 }) {
   return (
-    <div className="grid gap-3 rounded-2xl border border-border bg-card/70 p-4 md:grid-cols-4">
+    <div className="grid gap-4 rounded-lg border border-slate-200 bg-white p-5 shadow-md md:grid-cols-4">
       <Input
         type="date"
         value={filters.startDate ?? ''}

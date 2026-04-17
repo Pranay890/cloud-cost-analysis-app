@@ -4,8 +4,34 @@ import { BillingRecord, FilterState } from '@/lib/types';
 import { BillingRecordModel } from '@/models/BillingRecord';
 import { sampleBillingData } from '@/lib/sample-data';
 
-// ✅ fallback memory
-let memoryRecords: BillingRecord[] = [...sampleBillingData];
+// ✅ Start with empty records - only populate after CSV upload
+let memoryRecords: BillingRecord[] = [];
+
+// ==========================
+// ✅ CLEAR DATA (for fresh user start)
+// ==========================
+export async function clearBillingRecords() {
+  memoryRecords = [];
+  
+  const db = await connectToDatabase();
+  if (db.connected) {
+    try {
+      await BillingRecordModel.deleteMany({});
+    } catch (error) {
+      console.error('Error clearing MongoDB:', error);
+    }
+  }
+  
+  return { cleared: true };
+}
+
+// ==========================
+// ✅ LOAD SAMPLE DATA (optional - for demo/reset)
+// ==========================
+export async function loadSampleData() {
+  const { persistedToMongo } = await saveBillingRecords(sampleBillingData);
+  return { persistedToMongo };
+}
 
 // ==========================
 // ✅ SAVE DATA

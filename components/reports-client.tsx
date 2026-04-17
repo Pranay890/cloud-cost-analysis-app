@@ -56,10 +56,10 @@ export function ReportsClient() {
         {/* Header */}
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="text-sm uppercase tracking-[0.25em] text-blue-300">
+            <p className="text-sm uppercase tracking-[0.25em] text-primary font-semibold">
               Reports
             </p>
-            <h2 className="mt-2 text-3xl font-semibold text-white">
+            <h2 className="mt-2 text-3xl font-bold text-foreground">
               Executive-ready cost summaries for reviews and presentations.
             </h2>
           </div>
@@ -75,27 +75,27 @@ export function ReportsClient() {
           <div className="grid gap-6 xl:grid-cols-3">
 
             {/* Total Cost */}
-            <Card className="p-6 flex flex-col justify-between hover:shadow-[0_0_20px_rgba(59,130,246,0.15)] transition-all">
+            <Card className="p-6 flex flex-col justify-between hover:shadow-card-hover transition-all">
               <div>
                 <p className="text-sm text-muted">Total monthly cost</p>
-                <h3 className="mt-4 text-4xl font-bold text-white">
+                <h3 className="mt-4 text-4xl font-bold text-foreground">
                   {currency.format(analytics.totalCost)}
                 </h3>
               </div>
             </Card>
 
             {/* Highest Service */}
-            <Card className="p-6 flex flex-col justify-between hover:shadow-[0_0_20px_rgba(59,130,246,0.15)] transition-all">
+            <Card className="p-6 flex flex-col justify-between hover:shadow-card-hover transition-all">
               <div>
                 <p className="text-sm text-muted">
                   Highest spending service
                 </p>
 
-                <h3 className="mt-6 text-4xl font-bold text-white">
+                <h3 className="mt-6 text-4xl font-bold text-foreground">
                   {analytics.highestSpendingService?.service ?? 'N/A'}
                 </h3>
 
-                <p className="mt-2 text-lg text-blue-300">
+                <p className="mt-2 text-lg text-primary">
                   {currency.format(
                     analytics.highestSpendingService?.cost ?? 0
                   )}
@@ -114,7 +114,7 @@ export function ReportsClient() {
                     className="flex items-center justify-between rounded-2xl border border-border px-4 py-3 text-sm"
                   >
                     <span className="text-muted">{item.label}</span>
-                    <span className="font-semibold text-white">
+                    <span className="font-bold text-foreground">
                       {currency.format(item.cost)}
                     </span>
                   </div>

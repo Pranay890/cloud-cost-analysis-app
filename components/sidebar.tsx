@@ -2,11 +2,17 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { BarChart3, BrainCircuit, FileText, Home, Lightbulb } from 'lucide-react';
+import { BarChart3, BrainCircuit, Compass, FileText, Home, Lightbulb, Lock, Radar } from 'lucide-react';
+import { useState } from 'react';
+import { UserProfileModal } from '@/components/user-profile-modal';
+import { useAnalytics } from '@/lib/analytics-context';
+import { useAuth } from '@/lib/auth-context';
 import { cn } from '@/lib/utils';
 
 const navigation = [
-  { href: '/', label: 'Dashboard', icon: Home },
+  { href: '/', label: 'Home', icon: Compass },
+  { href: '/dashboard', label: 'Dashboard', icon: Home },
+  { href: '/anomaly-detection', label: 'Anomaly Detection', icon: Radar },
   { href: '/cost-analysis', label: 'Cost Analysis', icon: BarChart3 },
   { href: '/reports', label: 'Reports', icon: FileText },
   { href: '/recommendations', label: 'Recommendations', icon: Lightbulb },
@@ -15,66 +21,80 @@ const navigation = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const { user } = useAuth();
+  const { hasData } = useAnalytics();
+  const [isUserModalOpen, setIsUserModalOpen] = useState(false);
+
+  const userInitial = user ? user.name.charAt(0).toUpperCase() : 'N';
 
   return (
-    <aside className="sticky top-0 flex h-screen w-full max-w-72 flex-col border-r border-blue-500/10 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 p-6 backdrop-blur-xl">
+    <aside className="sticky top-0 flex h-screen w-full max-w-72 flex-col border-r border-border bg-white p-6 backdrop-blur-xl">
+      <div className="pointer-events-none absolute inset-x-6 top-6 h-40 rounded-[2rem] bg-primary/5 blur-3xl" />
 
-      {/* Top Section */}
-      <div className="space-y-8">
+      <div className="relative space-y-8">
         <div>
-          <p className="text-xs uppercase tracking-[0.35em] text-blue-400">
-            FinOps Studio
-          </p>
-
-          <h1 className="mt-3 text-2xl font-bold text-white">
-            Cloud Cost Platform
-          </h1>
-
-          <p className="mt-2 text-sm text-muted">
-            AI-powered analytics, cost visibility, and optimization insights.
+          <p className="text-xs font-semibold uppercase tracking-[0.35em] text-primary">Fin-Analysis</p>
+          <h1 className="mt-3 text-2xl font-bold tracking-tight text-foreground">FinOps Platform</h1>
+          <p className="mt-2 max-w-[18rem] text-sm leading-6 text-muted">
+            AI-powered cost analytics and optimization.
           </p>
         </div>
 
-        {/* Navigation */}
-        <nav className="space-y-2">
+        <nav className="space-y-2 rounded-lg border border-border bg-white p-3 shadow-card backdrop-blur-sm">
           {navigation.map(({ href, label, icon: Icon }) => {
             const active = pathname === href;
+            const isDataPage = href !== '/' && href !== '/dashboard';
+            const isDisabled = isDataPage && !hasData;
 
             return (
-              <Link
-                key={href}
-                href={href}
-                className={cn(
-                  'group relative flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition-all duration-300',
-                  active
-                    ? 'bg-blue-500/15 text-white shadow-[0_0_20px_rgba(59,130,246,0.25)]'
-                    : 'text-muted hover:bg-slate-800/60 hover:text-white'
-                )}
-              >
-                {/* Active Left Glow Bar */}
-                {active && (
-                  <span className="absolute left-0 top-2 bottom-2 w-1 rounded-full bg-blue-500"></span>
-                )}
+              <div key={href} title={isDisabled ? 'Upload data first' : undefined}>
+                {isDisabled ? (
+                  <div
+                    className={cn(
+                      'group relative flex cursor-not-allowed items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium opacity-40 transition-all duration-300'
+                    )}
+                  >
+                    <Lock className="h-4 w-4" />
+                    {label}
+                  </div>
+                ) : (
+                  <Link
+                    href={href}
+                    className={cn(
+                      'group relative flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200',
+                      active
+                        ? 'bg-primary-light text-primary shadow-sm border-l-2 border-primary'
+                        : 'text-foreground/70 hover:bg-slate-50 hover:text-foreground'
+                    )}
+                  >
+                    {active && (
+                      <span className="absolute left-0 top-2 bottom-2 w-0.5 rounded-full bg-primary" />
+                    )}
 
-                <Icon className="h-4 w-4 transition-transform duration-300 group-hover:scale-110" />
-                {label}
-              </Link>
+                    <Icon className="h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
+                    {label}
+                  </Link>
+                )}
+              </div>
             );
           })}
         </nav>
       </div>
 
-      {/* Bottom Profile */}
-      <div className="mt-auto flex items-center gap-3 rounded-2xl border border-blue-500/10 bg-slate-900/60 p-3 backdrop-blur">
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-500/20 text-blue-300 font-semibold">
-          N
+      <button
+        onClick={() => setIsUserModalOpen(true)}
+        className="relative mt-auto flex w-full items-center gap-3 rounded-lg border border-border bg-white p-3.5 shadow-card transition-all duration-200 hover:bg-slate-50 hover:shadow-card-hover"
+      >
+        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-primary text-white font-semibold">
+          {userInitial}
         </div>
-        <div>
-          <p className="text-sm font-medium text-white">User</p>
+        <div className="flex-1 text-left">
+          <p className="text-sm font-medium text-foreground">{user?.name || 'User'}</p>
           <p className="text-xs text-muted">Active session</p>
         </div>
-      </div>
+      </button>
 
+      <UserProfileModal isOpen={isUserModalOpen} onClose={() => setIsUserModalOpen(false)} />
     </aside>
   );
 }

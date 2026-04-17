@@ -3,30 +3,101 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
+}
+
+html {
+  background: #F8FAFC;
 }
 
 body {
-  @apply bg-background text-foreground antialiased;
+  @apply text-foreground antialiased;
+  font-family: "Aptos", "Segoe UI", "Helvetica Neue", sans-serif;
+  background: linear-gradient(180deg, #F8FAFC 0%, #FFFFFF 100%);
+  min-height: 100vh;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
   background-image:
-    radial-gradient(circle at top, rgba(59, 130, 246, 0.12), transparent 30%),
-    linear-gradient(to bottom right, rgba(15, 23, 42, 0.95), rgba(2, 6, 23, 1));
+    linear-gradient(rgba(226, 232, 240, 0.4) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(226, 232, 240, 0.4) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.1), transparent 78%);
+  opacity: 0.2;
+}
+
+::selection {
+  background: rgba(37, 99, 235, 0.2);
+  color: #0F172A;
 }
 
 * {
   scrollbar-width: thin;
-  scrollbar-color: #1d4ed8 #060816;
+  scrollbar-color: #2563EB #E2E8F0;
 }
 
 ::-webkit-scrollbar {
-  width: 10px;
+  width: 12px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #060816;
+  background: #E2E8F0;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1d4ed8;
+  background: #2563EB;
   border-radius: 9999px;
+  border: 2px solid #E2E8F0;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #1D4ED8;
+}
+
+/* Premium animations */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+/* Smooth transitions for interactive elements */
+button, [role="button"], a {
+  transition: all 0.2s ease;
+}
+
+/* Card hover lift effect */
+[class*="card"] {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[class*="card"]:hover {
+  transform: translateY(-2px);
 }

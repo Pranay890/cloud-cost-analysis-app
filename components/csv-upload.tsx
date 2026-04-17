@@ -62,12 +62,13 @@ export function CsvUpload({ onUploaded }: { onUploaded: () => Promise<void> }) {
   };
 
   return (
-    <div className="rounded-2xl border border-dashed border-blue-400/40 bg-blue-500/5 p-5">
+    <div className="rounded-lg border border-primary/20 bg-primary-light/50 p-5 shadow-card">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <h3 className="text-lg font-semibold text-white">Upload cloud billing CSV</h3>
+          <h3 className="text-lg font-bold text-foreground">Upload cloud billing CSV</h3>
           <p className="mt-1 text-sm text-muted">
-            Supports AWS, Azure, and GCP. Required columns: <span className="text-white">date, service_name, cost</span>.
+            Supports AWS, Azure, and GCP. Required columns:{' '}
+            <span className="font-medium text-foreground">date, service_name, cost</span>.
           </p>
         </div>
         <div className="flex gap-3">
@@ -87,7 +88,7 @@ export function CsvUpload({ onUploaded }: { onUploaded: () => Promise<void> }) {
           </Button>
         </div>
       </div>
-      {message && <p className="mt-3 text-sm text-blue-100">{message}</p>}
+      {message && <p className="mt-3 text-sm text-foreground">{message}</p>}
     </div>
   );
 }

@@ -36,6 +36,31 @@ export type Recommendation = {
   severity: 'high' | 'medium' | 'low';
 };
 
+export type AnomalySeverity = 'low' | 'medium' | 'high';
+
+export type CostAnomaly = {
+  id: string;
+  date: string;
+  scope: 'total' | 'service';
+  service?: string;
+  observedCost: number;
+  expectedCost: number;
+  deviation: number;
+  deviationPct: number;
+  zScore: number;
+  severity: AnomalySeverity;
+  summary: string;
+  probableCause: string;
+  recommendedAction: string;
+};
+
+export type AnomalySummary = {
+  totalAnomalies: number;
+  highSeverityCount: number;
+  totalPotentialImpact: number;
+  latestAnomalyDate: string | null;
+};
+
 export type AnalyticsPayload = {
   records: BillingRecord[];
   totalCost: number;
@@ -49,4 +74,6 @@ export type AnalyticsPayload = {
   weeklyTrend: { label: string; cost: number }[];
   highestSpendingService: { service: string; cost: number } | null;
   dateRange: { min: string; max: string } | null;
+  anomalies: CostAnomaly[];
+  anomalySummary: AnomalySummary;
 };

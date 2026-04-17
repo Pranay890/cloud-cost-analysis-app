@@ -1,10 +1,5 @@
-import { DashboardClient } from '@/components/dashboard-client';
-import { LayoutShell } from '@/components/layout-shell';
+import { HomePageWrapper } from '@/components/home-page-wrapper';
 
 export default function HomePage() {
-  return (
-    <LayoutShell>
-      <DashboardClient />
-    </LayoutShell>
-  );
+  return <HomePageWrapper />;
 }
