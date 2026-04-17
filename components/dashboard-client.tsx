@@ -165,13 +165,13 @@ export function DashboardClient() {
           </div>
 
           <div className="flex flex-col items-end flex-shrink-0 w-full max-w-sm ml-auto mt-2 xl:mt-0">
-            <div className="flex flex-col gap-3 w-full">
-              <div className="flex gap-2 justify-end">
-                <Button variant="outline" onClick={clearData} className="flex items-center gap-2 px-5 py-2">
+            <div className="flex flex-col gap-2 w-full">
+              <div className="flex gap-2 justify-end w-full">
+                <Button variant="outline" onClick={clearData} className="flex items-center gap-2 flex-1 justify-center">
                   <RefreshCw className="h-4 w-4" />
                   <span>{resetting ? 'Clearing...' : 'Clear'}</span>
                 </Button>
-                <Button variant="outline" onClick={resetData} className="flex items-center gap-2 px-5 py-2">
+                <Button variant="outline" onClick={resetData} className="flex items-center gap-2 flex-1 justify-center">
                   <RefreshCw className="h-4 w-4" />
                   <span>{resetting ? 'Resetting...' : 'Reset'}</span>
                 </Button>

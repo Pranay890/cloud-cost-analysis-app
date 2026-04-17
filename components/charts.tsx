@@ -66,8 +66,8 @@ export function TrendLineChart({
         <h3 className="mt-1 text-lg font-bold text-foreground">Daily Cost Analysis</h3>
         <p className="text-sm text-slate-600">Monitor spending patterns and identify anomalies in real-time.</p>
       </div>
-      <ResponsiveContainer width="100%" height="85%">
-        <AreaChart data={data}>
+      <ResponsiveContainer width="100%" height="80%">
+        <AreaChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
           <defs>
             <linearGradient id="costGradient" x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor="#2563EB" stopOpacity={0.3}/>
@@ -136,8 +136,8 @@ export function ServiceBarChart({ data }: { data: { service: string; cost: numbe
         <h3 className="mt-1 text-lg font-bold text-foreground">Cost by Service</h3>
         <p className="text-sm text-slate-600">Compare spending across cloud services and resources.</p>
       </div>
-      <ResponsiveContainer width="100%" height="88%">
-        <BarChart data={data} margin={{ top: 0, right: 10, bottom: 0, left: 0 }}>
+      <ResponsiveContainer width="100%" height="82%">
+        <BarChart data={data} margin={{ top: 10, right: 30, bottom: 0, left: 0 }}>
           <CartesianGrid stroke="#E2E8F0" vertical={false} strokeDasharray="5 5" />
           <XAxis
             dataKey="service"
@@ -177,8 +177,8 @@ export function DistributionPieChart({ data }: { data: { name: string; value: nu
         <h3 className="mt-1 text-lg font-bold text-foreground">Cost Allocation</h3>
         <p className="text-sm text-slate-600">Understand the proportion of costs across services.</p>
       </div>
-      <ResponsiveContainer width="100%" height="88%">
-        <PieChart margin={{ top: 0, right: 0, bottom: 30, left: 0 }}>
+      <ResponsiveContainer width="100%" height="82%">
+        <PieChart margin={{ top: 0, right: 0, bottom: 50, left: 0 }}>
           <Pie
             data={data}
             dataKey="value"
