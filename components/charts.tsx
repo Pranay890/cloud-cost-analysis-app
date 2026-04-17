@@ -16,6 +16,7 @@ import {
   YAxis,
   Area,
   AreaChart,
+  ReferenceDot,
 } from 'recharts';
 import { Card } from '@/components/ui/card';
 import { CostAnomaly } from '@/lib/types';
@@ -58,6 +59,9 @@ export function TrendLineChart({
     anomalies.filter((anomaly) => anomaly.scope === 'total').map((anomaly) => anomaly.date)
   );
 
+  // Get anomaly data points for visualization
+  const anomalyPoints = data.filter((d) => anomalyDates.has(d.date));
+
   return (
     <Card className="relative h-[380px] overflow-hidden p-6">
       <div className="pointer-events-none absolute inset-x-6 top-0 h-20 rounded-full bg-primary/5 blur-2xl" />
@@ -97,30 +101,18 @@ export function TrendLineChart({
             dot={false}
             activeDot={{ r: 6, fill: '#1D4ED8', stroke: '#FFFFFF', strokeWidth: 2 }}
           />
-          <Line
-            type="monotone"
-            dataKey="cost"
-            stroke="#2563EB"
-            strokeWidth={2.5}
-            dot={({ cx, cy, payload }) => {
-              if (!payload?.date || !anomalyDates.has(payload.date)) {
-                return <g key={`line-dot-${payload?.date ?? 'empty'}`} />;
-              }
-
-              return (
-                <circle
-                  key={`anomaly-dot-${payload.date}`}
-                  cx={cx}
-                  cy={cy}
-                  r={6}
-                  fill="#EF4444"
-                  stroke="#FFFFFF"
-                  strokeWidth={2}
-                />
-              );
-            }}
-            isAnimationActive={false}
-          />
+          {/* Render anomaly dots */}
+          {anomalyPoints.map((point) => (
+            <ReferenceDot
+              key={`anomaly-${point.date}`}
+              x={point.date}
+              y={point.cost}
+              r={6}
+              fill="#EF4444"
+              stroke="#FFFFFF"
+              strokeWidth={2}
+            />
+          ))}
         </AreaChart>
       </ResponsiveContainer>
     </Card>
