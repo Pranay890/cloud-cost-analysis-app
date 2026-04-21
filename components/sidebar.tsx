@@ -28,10 +28,13 @@ export function Sidebar() {
   const userInitial = user ? user.name.charAt(0).toUpperCase() : 'N';
 
   return (
-    <aside className="sticky top-0 flex h-screen w-full max-w-72 flex-col border-r border-border bg-white p-6 backdrop-blur-xl">
-      <div className="pointer-events-none absolute inset-x-6 top-6 h-40 rounded-[2rem] bg-primary/5 blur-3xl" />
+    <aside className="sticky top-0 flex h-screen w-full max-w-72 flex-col border-r border-border bg-white p-6 backdrop-blur-xl relative overflow-hidden">
+      {/* Blue fade background theme matching home page */}
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_14%,rgba(37,99,235,0.08),transparent_18%),radial-gradient(circle_at_82%_8%,rgba(37,99,235,0.1),transparent_24%),radial-gradient(circle_at_72%_58%,rgba(22,163,74,0.06),transparent_22%),radial-gradient(circle_at_20%_60%,rgba(37,99,235,0.06),transparent_24%),radial-gradient(circle_at_80%_80%,rgba(22,163,74,0.04),transparent_20%)] z-0" />
+      <div className="pointer-events-none absolute left-[-10%] top-[35%] h-[40rem] w-[40rem] rounded-full bg-primary/5 blur-[120px] z-0" />
+      <div className="pointer-events-none absolute right-[-5%] top-[65%] h-[35rem] w-[35rem] rounded-full bg-success/5 blur-[120px] z-0" />
 
-      <div className="relative space-y-8">
+      <div className="relative z-10 space-y-8 flex-1 flex flex-col">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.35em] text-primary">Fin-Analysis</p>
           <h1 className="mt-3 text-2xl font-bold tracking-tight text-foreground">FinOps Platform</h1>
@@ -83,7 +86,7 @@ export function Sidebar() {
 
       <button
         onClick={() => setIsUserModalOpen(true)}
-        className="relative mt-auto flex w-full items-center gap-3 rounded-lg border border-border bg-white p-3.5 shadow-card transition-all duration-200 hover:bg-slate-50 hover:shadow-card-hover"
+        className="relative z-10 mt-auto flex w-full items-center gap-3 rounded-lg border border-border bg-white p-3.5 shadow-card transition-all duration-200 hover:bg-slate-50 hover:shadow-card-hover"
       >
         <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-primary text-white font-semibold">
           {userInitial}
