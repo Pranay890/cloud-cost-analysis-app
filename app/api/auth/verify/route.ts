@@ -8,7 +8,7 @@ export async function GET(request: Request) {
 
     // Debug endpoint to see all users
     if (action === 'list-all') {
-      const allUsers = getAllUsers();
+      const allUsers = await getAllUsers();
       console.log('🔍 [VERIFY] All users:', allUsers);
       return Response.json({ 
         count: allUsers.length,
@@ -19,7 +19,7 @@ export async function GET(request: Request) {
 
     if (email) {
       console.log('🔍 [VERIFY] Looking up email:', email);
-      const user = getUserByEmail(email);
+      const user = await getUserByEmail(email);
       
       if (user) {
         console.log('✅ [VERIFY] User found:', user);
@@ -35,7 +35,7 @@ export async function GET(request: Request) {
       }
     }
 
-    const allUsers = getAllUsers();
+    const allUsers = await getAllUsers();
     return Response.json({ 
       message: 'Verify endpoint - provide email parameter or ?action=list-all',
       totalUsers: allUsers.length,

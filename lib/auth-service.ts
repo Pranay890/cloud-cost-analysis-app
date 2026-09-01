@@ -1,6 +1,6 @@
 import { getUser, addUser, getAllUsers as getAllStoredUsers } from './auth-storage';
 
-// File-based persistent storage for users
+// MongoDB-backed persistent storage for users
 export async function createUser(email: string, name: string, password: string) {
   const normalizedEmail = email.toLowerCase().trim();
   
@@ -11,9 +11,9 @@ export async function createUser(email: string, name: string, password: string) 
   });
 
   try {
-    const newUser = addUser(normalizedEmail, name, password);
+    const newUser = await addUser(normalizedEmail, name, password);
     console.log('✅ [AUTH-SERVICE] User created and stored:', normalizedEmail);
-    const allUsers = getAllStoredUsers();
+    const allUsers = await getAllStoredUsers();
     console.log('📋 [AUTH-SERVICE] All stored users:', allUsers.map(u => u.email));
     return { id: newUser.id, email: newUser.email, name: newUser.name };
   } catch (error: any) {
@@ -30,10 +30,10 @@ export async function authenticateUser(email: string, password: string) {
     normalizedEmail,
   });
 
-  const allUsers = getAllStoredUsers();
+  const allUsers = await getAllStoredUsers();
   console.log('📋 [AUTH-SERVICE] Available users in storage:', allUsers.map(u => u.email));
 
-  const user = getUser(normalizedEmail);
+  const user = await getUser(normalizedEmail);
 
   if (!user) {
     console.error('❌ [AUTH-SERVICE] User not found:', normalizedEmail);
@@ -49,15 +49,16 @@ export async function authenticateUser(email: string, password: string) {
   return { id: user.id, email: user.email, name: user.name };
 }
 
-export function getUserByEmail(email: string) {
+export async function getUserByEmail(email: string) {
   const normalizedEmail = email.toLowerCase().trim();
-  const user = getUser(normalizedEmail);
+  const user = await getUser(normalizedEmail);
   if (!user) return null;
   return { id: user.id, email: user.email, name: user.name };
 }
 
-export function getAllUsers() {
-  return getAllStoredUsers().map(u => ({
+export async function getAllUsers() {
+  const allUsers = await getAllStoredUsers();
+  return allUsers.map(u => ({
     email: u.email,
     name: u.name,
     id: u.id,

@@ -1,5 +1,5 @@
-import * as fs from 'fs';
-import * as path from 'path';
+import { connectToDatabase } from './db';
+import { UserModel } from '@/models/User';
 
 interface StoredUser {
   id: string;
@@ -9,105 +9,70 @@ interface StoredUser {
   createdAt: string;
 }
 
-interface UserStorage {
-  users: StoredUser[];
-}
-
-const STORAGE_FILE = path.join(process.cwd(), '.auth-storage.json');
-
-// Ensure directory exists
-function ensureStorageFile() {
-  try {
-    if (!fs.existsSync(STORAGE_FILE)) {
-      const initialData: UserStorage = {
-        users: [
-          {
-            id: 'test-user-123',
-            email: 'test@example.com',
-            name: 'Test User',
-            password: 'password123',
-            createdAt: new Date().toISOString(),
-          },
-        ],
-      };
-      fs.writeFileSync(STORAGE_FILE, JSON.stringify(initialData, null, 2));
-    }
-  } catch (error) {
-    console.error('Error ensuring storage file:', error);
-  }
-}
-
-function readStorage(): UserStorage {
-  try {
-    ensureStorageFile();
-    const data = fs.readFileSync(STORAGE_FILE, 'utf-8');
-    return JSON.parse(data);
-  } catch (error) {
-    console.error('Error reading storage:', error);
-    return { users: [] };
-  }
-}
-
-function writeStorage(data: UserStorage) {
-  try {
-    fs.writeFileSync(STORAGE_FILE, JSON.stringify(data, null, 2));
-  } catch (error) {
-    console.error('Error writing storage:', error);
-  }
-}
-
-export function getUser(email: string): StoredUser | null {
+export async function getUser(email: string): Promise<StoredUser | null> {
   const normalizedEmail = email.toLowerCase().trim();
-  const storage = readStorage();
-  const user = storage.users.find(u => u.email === normalizedEmail);
-  return user || null;
+  await connectToDatabase();
+  
+  const user = await UserModel.findOne({ email: normalizedEmail }).lean();
+  if (!user) return null;
+  
+  return {
+    id: (user as any)._id.toString(),
+    email: (user as any).email,
+    name: (user as any).name,
+    password: (user as any).password,
+    createdAt: (user as any).createdAt?.toISOString?.() || new Date().toISOString(),
+  };
 }
 
-export function addUser(email: string, name: string, password: string): StoredUser {
+export async function addUser(email: string, name: string, password: string): Promise<StoredUser> {
   const normalizedEmail = email.toLowerCase().trim();
-  const storage = readStorage();
+  await connectToDatabase();
 
   // Check if user already exists
-  if (storage.users.find(u => u.email === normalizedEmail)) {
+  const existing = await UserModel.findOne({ email: normalizedEmail });
+  if (existing) {
     throw new Error('User already exists');
   }
 
-  const newUser: StoredUser = {
-    id: Math.random().toString(36).substring(7),
+  const newUser = await UserModel.create({
     email: normalizedEmail,
     name,
     password,
-    createdAt: new Date().toISOString(),
+  });
+
+  return {
+    id: newUser._id.toString(),
+    email: newUser.email,
+    name: newUser.name,
+    password: newUser.password,
+    createdAt: newUser.createdAt?.toISOString?.() || new Date().toISOString(),
   };
-
-  storage.users.push(newUser);
-  writeStorage(storage);
-
-  return newUser;
 }
 
-export function getAllUsers(): StoredUser[] {
-  const storage = readStorage();
-  return storage.users.map(u => ({
-    id: u.id,
+export async function getAllUsers(): Promise<StoredUser[]> {
+  await connectToDatabase();
+  
+  const users = await UserModel.find({}).lean();
+  return (users as any[]).map((u: any) => ({
+    id: u._id.toString(),
     email: u.email,
     name: u.name,
     password: u.password,
-    createdAt: u.createdAt,
+    createdAt: u.createdAt?.toISOString?.() || new Date().toISOString(),
   }));
 }
 
-export function clearAllUsers() {
-  const storage: UserStorage = {
-    users: [
-      {
-        id: 'test-user-123',
-        email: 'test@example.com',
-        name: 'Test User',
-        password: 'password123',
-        createdAt: new Date().toISOString(),
-      },
-    ],
-  };
-  writeStorage(storage);
+export async function clearAllUsers() {
+  await connectToDatabase();
+  
+  // Delete all users except the test user
+  await UserModel.deleteMany({});
+  
+  // Re-create the default test user
+  await UserModel.create({
+    email: 'test@example.com',
+    name: 'Test User',
+    password: 'password123',
+  });
 }
